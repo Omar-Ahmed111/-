@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>نظام بيانات العائلة</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Cairo', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f0f4f8;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .section {
+      display: none;
+      max-width: 700px;
+      width: 90%; /* Responsive width */
+      margin: 20px auto; /* Adjusted margin for better mobile view */
+      padding: 30px;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      box-sizing: border-box; /* Include padding in width calculation */
+    }
+    .section.active {
+      display: block;
+    }
+    h2 {
+      text-align: center;
+      color: #0077b6;
+      margin-bottom: 25px;
+    }
+    label {
+      display: block;
+      margin: 10px 0 5px;
+      color: #333;
+      font-weight: bold;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      box-sizing: border-box; /* Include padding in width calculation */
+      font-size: 1rem;
+    }
+    .btn {
+      padding: 12px 20px;
+      background: #00b4d8;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      margin: 5px;
+      font-size: 1rem;
+      transition: background 0.3s ease, transform 0.2s ease;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .btn:hover {
+      background: #0096c7;
+      transform: translateY(-2px);
+    }
+    .btn:active {
+      transform: translateY(0);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    #result div {
+      background: #f1faff;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 10px;
+      border: 1px dashed #00b4d8;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    #result div strong {
+      color: #0077b6;
+      font-size: 1.1rem;
+    }
+    .logo {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .logo img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 15px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+    #wrongPassword {
+      color: #dc3545;
+      text-align: center;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    /* Custom Alert Styles */
+    .custom-alert {
+      display: none; /* مخفي في البداية */
+      position: fixed; /* يبقى في مكانه حتى عند التمرير */
+      top: 20px; /* 20 بكسل من الأعلى */
+      left: 50%; /* في منتصف الشاشة أفقياً */
+      transform: translateX(-50%); /* لجعله في المنتصف تماماً */
+      padding: 15px 25px;
+      border-radius: 10px;
+      color: white;
+      font-weight: bold;
+      text-align: center;
+      z-index: 1000; /* لضمان ظهوره فوق باقي العناصر */
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      opacity: 0; /* للتحكم في ظهور واختفاء الرسالة بانسيابية */
+      transition: opacity 0.5s ease-in-out; /* حركة انسيابية */
+      min-width: 250px; /* Minimum width for readability */
+    }
+
+    /* ألوان مختلفة لأنواع الرسائل */
+    .custom-alert.success {
+      background-color: #28a745; /* أخضر للنجاح */
+    }
+
+    .custom-alert.error {
+      background-color: #dc3545; /* أحمر للخطأ */
+    }
+
+    .custom-alert.info {
+      background-color: #007bff; /* أزرق للمعلومات */
+    }
+
+    /* عند إظهار الرسالة */
+    .custom-alert.show {
+      opacity: 1;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 600px) {
+      .section {
+        padding: 20px;
+        margin: 15px auto;
+      }
+      .btn {
+        width: calc(100% - 10px); /* Make buttons full width on small screens */
+        margin: 5px 0;
+      }
+      input {
+        font-size: 0.95rem;
+      }
+      .custom-alert {
+        width: 90%;
+        left: 5%;
+        transform: translateX(0);
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Custom Alert Element -->
+<div id="customAlert" class="custom-alert">
+  <span id="alertMessage"></span>
+</div>
+
+<!-- واجهة ترحيبية -->
+<div id="welcomeSection" class="section active">
+  <div class="logo">
+    <img src="https://placehold.co/400x150/0077b6/ffffff?text=شعار+العائلة" alt="شعار العائلة">
+  </div>
+  <h2>مرحبًا بكم في نظام تسجيل بيانات عائلة العرب</h2>
+  <p style="text-align:center">اضغط على الزر للمتابعة إلى تسجيل الدخول</p>
+  <div style="text-align:center">
+    <button class="btn" onclick="switchSection('loginSection')">ابدأ</button>
+  </div>
+</div>
+
+<!-- صفحة تسجيل الدخول -->
+<div id="loginSection" class="section">
+  <h2>🔒 تسجيل الدخول</h2>
+  <input type="password" id="passwordInput" placeholder="كلمة المرور">
+  <button class="btn" onclick="checkPassword()">دخول</button>
+  <p id="wrongPassword" style="color:red; display:none">كلمة السر خاطئة</p>
+</div>
+
+<!-- صفحة تسجيل البيانات -->
+<div id="registerSection" class="section">
+  <h2>📝 تسجيل بيانات العائلة</h2>
+  <form id="familyForm">
+    <label for="name">الاسم</label>
+    <input type="text" id="name" required>
+    <label for="phone">رقم الهاتف</label>
+    <input type="text" id="phone" required>
+    <label for="address">العنوان</label>
+    <input type="text" id="address" required>
+    <label for="age">العمر</label>
+    <input type="number" id="age" required>
+    <label for="notes">ملاحظات</label>
+    <input type="text" id="notes">
+    <button type="submit" class="btn">حفظ البيانات</button>
+    <button type="button" class="btn" onclick="switchSection('viewSection'); displayData(familyData);">عرض البيانات</button>
+  </form>
+</div>
+
+<!-- صفحة عرض البيانات -->
+<div id="viewSection" class="section">
+  <h2>📋 عرض البيانات</h2>
+  <input type="search" id="searchInput" placeholder="ابحث بالاسم أو الهاتف..." oninput="searchData()">
+  <div id="result"></div>
+  <button class="btn" onclick="switchSection('registerSection')">رجوع للتسجيل</button>
+</div>
+
+<script>
+  let familyData = JSON.parse(localStorage.getItem('familyData')) || [];
+  let editIndex = -1; // -1 means adding new entry, otherwise it's the index of the entry being edited
+
+  // Function to show custom alert messages
+  function showCustomAlert(message, type = 'info', duration = 3000) {
+    const customAlert = document.getElementById('customAlert');
+    const alertMessage = document.getElementById('alertMessage');
+
+    alertMessage.textContent = message;
+
+    // Remove any previous type classes and add the new one
+    customAlert.classList.remove('success', 'error', 'info');
+    customAlert.classList.add(type);
+
+    // Show the alert
+    customAlert.style.display = 'block';
+    setTimeout(() => {
+      customAlert.classList.add('show');
+    }, 10); // Small delay to ensure transition works
+
+    // Hide the alert after a specified duration
+    setTimeout(() => {
+      customAlert.classList.remove('show');
+      // Completely hide the element after the transition ends
+      setTimeout(() => {
+        customAlert.style.display = 'none';
+      }, 500); // This duration should match the CSS transition-duration
+    }, duration);
+  }
+
+  // Function to switch between different sections of the application
+  function switchSection(sectionId) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById(sectionId).classList.add('active');
+  }
+
+  // Function to check the password for login
+  function checkPassword() {
+    const pass = document.getElementById('passwordInput').value;
+    if (pass === '1234') {
+      switchSection('registerSection');
+      showCustomAlert('تم تسجيل الدخول بنجاح!', 'success');
+    } else {
+      document.getElementById('wrongPassword').style.display = 'block';
+      showCustomAlert('كلمة السر خاطئة، يرجى المحاولة مرة أخرى.', 'error');
+    }
+  }
+
+  // Event listener for the family data form submission
+  document.getElementById('familyForm').addEventListener('submit', function(e) {
+    e.preventDefault(); // Prevent default form submission
+
+    // Get input values
+    const name = document.getElementById('name').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const address = document.getElementById('address').value.trim();
+    const age = document.getElementById('age').value.trim();
+    const notes = document.getElementById('notes').value.trim();
+
+    // Basic validation for phone number (digits only)
+    if (!/^\d+$/.test(phone)) {
+      showCustomAlert('الرجاء إدخال رقم هاتف صحيح (أرقام فقط).', 'error');
+      return;
+    }
+
+    // Check for duplicate name or phone number
+    const isDuplicate = familyData.some((entry, index) => {
+      // If we are editing, don't compare with the entry being edited
+      if (editIndex !== -1 && index === editIndex) {
+        return false;
+      }
+      // Check if name or phone already exists
+      return entry.name === name || entry.phone === phone;
+    });
+
+    if (isDuplicate) {
+      showCustomAlert('الاسم أو رقم الهاتف مسجل بالفعل! يرجى التحقق من البيانات.', 'error', 5000);
+      return; // Stop the submission if a duplicate is found
+    }
+
+    const entry = { name, phone, address, age, notes };
+
+    if (editIndex === -1) {
+      // Add new entry
+      familyData.push(entry);
+      showCustomAlert('تم حفظ البيانات بنجاح!', 'success');
+    } else {
+      // Update existing entry
+      familyData[editIndex] = entry;
+      editIndex = -1; // Reset edit index after update
+      showCustomAlert('تم تحديث البيانات بنجاح!', 'success');
+    }
+
+    // Save updated data to local storage
+    localStorage.setItem('familyData', JSON.stringify(familyData));
+    this.reset(); // Clear form fields
+    switchSection('viewSection'); // Switch to view section
+    displayData(familyData); // Display updated data
+  });
+
+  // Function to display family data in the view section
+  function displayData(data) {
+    const container = document.getElementById('result');
+    if (data.length === 0) {
+      container.innerHTML = '<em style="text-align: center; display: block; color: #555;">لا توجد بيانات لعرضها.</em>';
+      return;
+    }
+    container.innerHTML = data.map((d, i) => `
+      <div>
+        <strong>${d.name}</strong><br>
+        📞 ${d.phone}<br>
+        🏠 ${d.address}<br>
+        🎂 ${d.age} سنة<br>
+        📝 ${d.notes || 'لا توجد ملاحظات'}<br>
+        <div style="margin-top: 10px;">
+          <button class="btn" onclick="editData(${i})">تعديل</button>
+          <button class="btn" onclick="deleteData(${i})">حذف</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // Function to search data based on name or phone
+  function searchData() {
+    const q = document.getElementById('searchInput').value.toLowerCase().trim();
+    const filtered = familyData.filter(p =>
+      p.name.toLowerCase().includes(q) || p.phone.includes(q)
+    );
+    displayData(filtered);
+  }
+
+  // Function to delete an entry
+  function deleteData(index) {
+    // Using a custom modal for confirmation is better than confirm()
+    // For simplicity, keeping confirm() for now, but ideally replace with a custom modal
+    if (confirm("هل أنت متأكد أنك تريد حذف هذا السجل؟")) {
+      familyData.splice(index, 1);
+      localStorage.setItem('familyData', JSON.stringify(familyData));
+      displayData(familyData);
+      showCustomAlert('تم حذف السجل بنجاح!', 'error');
+    }
+  }
+
+  // Function to populate form fields for editing an entry
+  function editData(index) {
+    const person = familyData[index];
+    document.getElementById('name').value = person.name;
+    document.getElementById('phone').value = person.phone;
+    document.getElementById('address').value = person.address;
+    document.getElementById('age').value = person.age;
+    document.getElementById('notes').value = person.notes;
+    editIndex = index; // Set the index of the entry being edited
+    switchSection('registerSection'); // Switch to register section for editing
+  }
+
+  // Initial display of data when the page loads
+  // This ensures that if the user goes directly to viewSection, data is shown
+  // However, the app starts at welcomeSection, so this might not be strictly necessary here
+  // but good practice if viewSection could be the initial view.
+  // displayData(familyData); // This line is commented out as the app starts at welcomeSection
+</script>
+
+</body>
+</html>
+
